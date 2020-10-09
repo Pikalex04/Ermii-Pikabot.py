@@ -5,7 +5,8 @@ It also includes some exclusives functions.
 #
 
 ### Setup
-Download the release, then put your bot token in "token/epb.txt".
+Download the release, then put the token of your bot in "token/epb.txt".
+Alternatively, install Python and the requirements listed in "requirements.txt", then put the token of your bot in "token/epb.txt" and run "bot.py".
 
 #
 
