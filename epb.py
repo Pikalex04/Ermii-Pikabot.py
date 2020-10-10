@@ -155,7 +155,7 @@ async def info(c):
               description='This bot is the new Ermii Bot.', color=embed_color())
     e.set_author(name='Ermii Pikabot Info',
                  icon_url='https://cdn.discordapp.com/avatars/607320011366989826/101bac55cf15807c5c74d7e0d95bb510.png')
-    e.add_field(name='Latest Version', value='1.0.5 (2020-10-09)')
+    e.add_field(name='Latest Version', value='1.0.14 (2020-10-10)')
     e.add_field(name='First Version', value='1.0 (2020-09-28)')
     e.add_field(name='Developers', value='Pikalex04 and Ermelber')
     e.add_field(name='Discord API Libraries', value='discord.py')
