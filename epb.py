@@ -43,7 +43,7 @@ def embed_color():
 
 
 def update_data(a):
-    d = r'bjson\db.json'
+    d = 'bjson/db.json'
     db = json_load(d)
     if a not in db:
         db[a] = 0
@@ -201,9 +201,9 @@ async def givepoints(c, p):
         r = m.mentions[0]
         i = str(r.id)
         update_data(i)
-        db = json_load('bjson\\db.json')
+        db = json_load('bjson/db.json')
         db[i] += int(p)
-        json_dump('bjson\\db.json', db)
+        json_dump('bjson/db.json', db)
         m = f'**{a.mention}**, gave **{p}** points to **{r.mention}**.'
         await c.send(m)
         await get_channel(566327770108657698).send(m)
@@ -234,7 +234,7 @@ async def removepoints(c, p):
         r = m.mentions[0]
         i = str(r.id)
         update_data(i)
-        d = r'bjson\db.json'
+        d = 'bjson/db.json'
         db = json_load(d)
         db[i] -= int(p)
         json_dump(d, db)
@@ -262,7 +262,7 @@ async def points(c):
         r = m.mentions[0]
         i = str(r.id)
         update_data(i)
-        db = json_load(r'bjson\db.json')
+        db = json_load('bjson/db.json')
         await c.send(f'**{a.mention}**, **{r.mention}** has **{db[i]}** points.')
 
 
@@ -276,7 +276,7 @@ async def ping(c):
 async def real_water_hour():
     while not bot.is_closed():
         if datetime.now().minute == 29 and datetime.now(tz=timezone.utc).hour == 19:
-            w = json_load(r'water\water.json')
+            w = json_load('water/water.json')
             t = datetime.now().weekday()
             e = d = u = ''
             for i in w:
@@ -301,7 +301,7 @@ async def on_ready():
 @bot.event
 async def on_message(m):
     if m.author.id in authorized:
-        d = r'bjson\db.json'
+        d = 'bjson/db.json'
         db = json_load(d)
         t = datetime.now().day
         if t in [1, 8, 16, 22]:
@@ -337,4 +337,4 @@ async def on_error(v, *a, **k):
     await get_channel(566327770108657698).send('fix your shit lmao <@552615180450660360>')
 
 
-bot.run(open(r'token\epb.txt', 'r').readline())
+bot.run(open('token/epb.txt', 'r').readline())
