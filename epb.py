@@ -159,7 +159,7 @@ async def info(c):
               description='This bot is the new Ermii Bot.', color=embed_color())
     e.set_author(name='Ermii Pikabot Info',
                  icon_url='https://cdn.discordapp.com/avatars/607320011366989826/101bac55cf15807c5c74d7e0d95bb510.png')
-    e.add_field(name='Latest Version', value='1.0.15 (2020-10-10)')
+    e.add_field(name='Latest Version', value='1.0.16 (2020-10-10)')
     e.add_field(name='First Version', value='1.0 (2020-09-28)')
     e.add_field(name='Developers', value='Pikalex04 and Ermelber')
     e.add_field(name='Discord API Libraries', value='discord.py')
@@ -279,7 +279,7 @@ async def ping(c):
 
 async def real_water_hour():
     while not bot.is_closed():
-        if datetime.now().minute == 29 and datetime.now(tz=timezone.utc).hour == 19:
+        if datetime.now().minute == 29 and datetime.now(tz=timezone.utc).hour == 21:
             w = json_load('water/water.json')
             t = datetime.now().weekday()
             e = d = u = ''
@@ -291,8 +291,7 @@ async def real_water_hour():
                     break
             e = Embed(title=e, description=d, color=embed_color())
             e.set_image(url=u)
-            m = await get_channel(398674318101446678).send(get_role(get_guild(398672171821563905).roles,
-                                                                    764196084415201321))
+            m = await get_channel(398674318101446678).send('<@&764196084415201321>')
             await m.edit(embed=e)
             return
         await sleep(60)
