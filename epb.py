@@ -35,7 +35,7 @@ def get_channel(c):
 
 
 def get_role(g, r):
-    return get(g, id=r)
+    return get(g.guild, id=r)
 
 
 def embed_color():
@@ -168,7 +168,7 @@ async def info(c):
 @bot.command()
 async def water(c):
     a = c.author
-    r = get_role(c.guild, 764196084415201321)
+    r = get_role(c, 764196084415201321)
     if r in a.roles:
         e = Embed(title='the real water hours at 23:29 (Italian Time).',
                   description='You got the <&764196084415201321> role removed. You\'ll not be mentioned anymore when '
