@@ -1,5 +1,5 @@
 from json import load, dump
-from discord import Embed
+from discord import Embed, Status
 from discord.ext import commands
 from discord.utils import get
 from time import monotonic
@@ -8,13 +8,10 @@ from math import floor
 from sys import exc_info
 from random import choice
 from asyncio import sleep
+from difflib import get_close_matches
 
 bot = commands.Bot(command_prefix='e.', owner_id=552615180450660360, case_insensitive=True)
 bot.remove_command('help')
-authorized = [552615180450660360, 198385417341370368, 188650807120494592, 177432416959332353, 201820283697496064,
-              189285659675066369, 164348894702993408, 193827690552360961, 552615180450660360, 202057451044995072,
-              171336518919520256, 183210046212145152, 252137961875832833, 150974465931608064, 165668389585420288,
-              94572460585779200, 188715801111560194, 203598377181642754]
 
 
 def json_dump(n, d):
@@ -30,12 +27,16 @@ def json_load(n):
         return a
 
 
-def get_channel(c):
-    return bot.get_channel(c)
-
-
-def get_guild(g):
-    return bot.get_guild(g)
+def closematch(w, o):
+    p = []
+    for v in o:
+        p.append(v.name)
+        if v.nick:
+            p.append(v.nick)
+    r = get_close_matches(w, p, 1, 0.1).pop()
+    if not get(o, name=r):
+        return get(o, nick=r)
+    return get(o, name=r)
 
 
 def get_role(g, r):
@@ -54,6 +55,12 @@ def update_data(a):
         json_dump(d, db)
 
 
+def update_uptime():
+    d = json_load('bjson/db.json')
+    d['u'] = datetime.now().isoformat(' ')
+    json_dump('bjson/db.json', d)
+
+
 @bot.group()
 async def help(c):
     if c.invoked_subcommand is None:
@@ -62,7 +69,7 @@ async def help(c):
         e.set_author(name='These are the available commands')
         e.add_field(name='1. Utilities',
                     value='`info` `mod` `ping`\n'
-                          '~~`uptime`~~')
+                          '`uptime`')
         e.add_field(name='2. Minecraft',
                     value='~~`mcsize` `mcstatus`~~')
         e.add_field(name='3. Fun',
@@ -85,18 +92,19 @@ async def info(c):
 
 @help.command()
 async def mod(c):
-    e = Embed(title='Use `e.help <command name>` to receive helpful information about that specific command!',
-              description='It\'s highly recommended to run `e.help` before using a command.', color=embed_color())
-    e.set_author(name='These are the available commands')
-    e.add_field(name='1. Utilities',
-                value='`givepoints` `points`\n'
-                      '`removepoints`')
-    e.add_field(name='2. Minecraft', value='None!')
-    e.add_field(name='3. Fun', value='None :P')
-    e.set_footer(text='Canceled commands aren\'t currently working.\n'
-                      'Underlined commands aren\'t working properly.\n'
-                      'For normal commands, run e.help.')
-    await c.send(embed=e)
+    if c.author.id in json_load('bjson/db.json')['a']:
+        e = Embed(title='Use `e.help <command name>` to receive helpful information about that specific command!',
+                  description='It\'s highly recommended to run `e.help` before using a command.', color=embed_color())
+        e.set_author(name='These are the available commands')
+        e.add_field(name='1. Utilities',
+                    value='`givepoints` `points`\n'
+                          '`removepoints`')
+        e.add_field(name='2. Minecraft', value='None!')
+        e.add_field(name='3. Fun', value='None :P')
+        e.set_footer(text='Canceled commands aren\'t currently working.\n'
+                          'Underlined commands aren\'t working properly.\n'
+                          'For normal commands, run e.help.')
+        await c.send(embed=e)
 
 
 @help.command()
@@ -106,6 +114,19 @@ async def ping(c):
     e.set_author(name='Ping')
     e.add_field(name='Usages', value='`e.ping`: Calculates the latency.', inline=False)
     e.add_field(name='Examples', value='`e.ping`')
+    await c.send(embed=e)
+
+
+@help.command()
+async def uptime(c):
+    e = Embed(title='e.uptime',
+              description='Tells you when the bot last restarted and the amount of online members right now.',
+              color=embed_color())
+    e.set_author(name='Uptime')
+    e.add_field(name='Usages',
+                value='`e.uptime`: Tells you when the bot last restarted and the amount of online members.',
+                inline=False)
+    e.add_field(name='Examples', value='`e.uptime`')
     await c.send(embed=e)
 
 
@@ -121,7 +142,7 @@ async def water(c):
 
 @help.command(aliases=['gp'])
 async def givepoints(c):
-    if c.author.id in authorized:
+    if c.author.id in json_load('bjson/db.json')['a']:
         e = Embed(title='e.givepoints', description='Gives Infraction Points to a user.', color=embed_color())
         e.set_author(name='Givepoints')
         e.add_field(name='Usages', value='`e.givepoints @someone`: Gives Infraction Points to someone.', inline=False)
@@ -132,7 +153,7 @@ async def givepoints(c):
 
 @help.command(aliases=['p'])
 async def points(c):
-    if c.author.id in authorized:
+    if c.author.id in json_load('bjson/db.json')['a']:
         e = Embed(title='e.points', description='Shows a user\'s Infraction Points.', color=embed_color())
         e.set_author(name='Points')
         e.add_field(name='Usages', value='`e.points @someone`: Shows someone\'s Infraction Points.', inline=False)
@@ -143,7 +164,7 @@ async def points(c):
 
 @help.command(aliases=['rp'])
 async def removepoints(c):
-    if c.author.id in authorized:
+    if c.author.id in json_load('bjson/db.json')['a']:
         e = Embed(title='e.removepoints', description='Removes Infraction Points from a user.', color=embed_color())
         e.set_author(name='Removepoints')
         e.add_field(name='Usages', value='`e.removepoints @someone`: Removes Infraction Points from someone.',
@@ -159,7 +180,7 @@ async def info(c):
               description='This bot is the new Ermii Bot.', color=embed_color())
     e.set_author(name='Ermii Pikabot Info',
                  icon_url='https://cdn.discordapp.com/avatars/607320011366989826/101bac55cf15807c5c74d7e0d95bb510.png')
-    e.add_field(name='Latest Version', value='1.0.16 (2020-10-10)')
+    e.add_field(name='Latest Version', value=json_load('bjson/db.json')['v'])
     e.add_field(name='First Version', value='1.0 (2020-09-28)')
     e.add_field(name='Developers', value='Pikalex04 and Ermelber')
     e.add_field(name='Discord API Libraries', value='discord.py')
@@ -167,6 +188,25 @@ async def info(c):
     e.set_footer(text='This bot was made by Pikalex. Still Hosted on Pika\'s Ubuntu Server.\n'
                       'This bot was ispired by Ermelber\'s bot. Not Anymore Hosted on Szymmy\'s Pi.')
     await c.send(embed=e)
+
+
+@bot.command()
+async def ping(c):
+    b = monotonic()
+    m = await c.send(embed=Embed(description='*Calculating...*', color=embed_color()))
+    await m.edit(embed=Embed(description=f'I suffer of `{int((monotonic() - b) * 1000)}ms` of latency, by the way.',
+                             color=embed_color()))
+
+
+@bot.command()
+async def uptime(c):
+    m = 0
+    for member in c.guild.members:
+        if member.status != Status.offline:
+            m += 1
+    await c.send(embed=Embed(description=f'Current time: **{datetime.now().isoformat(" ")}\n'
+                                         f'Bot last started at: **{json_load("bjson/db.json")["u"]}**\n'
+                                         f'Online members: **{m}**', color=embed_color()))
 
 
 @bot.command()
@@ -193,88 +233,128 @@ async def water(c):
 async def givepoints(c, p):
     a = c.author
     m = c.message
-    if a.id in authorized:
-        if not m.mentions:
-            await c.send(
-                f'**{a.mention}**, you forgot to mention someone (`e.givepoints <points> <@someone>`)!')
-            return
+    s = m.content.split()
+    if a.id in json_load('bjson/db.json')['a']:
         if p.isdigit() is False:
-            await c.send(
-                f'**{a.mention}**, you didn\'t choose a valid amount of points! (`e.givepoints <points> <@someone>`)!')
+            await c.send(embed=Embed(
+                description=f'<a:cross:747862910503616683> **| {a.display_name}**, you didn\'t choose a valid amount of'
+                            f' points!', color=embed_color()))
             return
-        r = m.mentions[0]
-        i = str(r.id)
+        if len(s) == 2:
+            await c.send(Embed(description=f'<a:cross:747862910503616683> **| {a.display_name}**, you forgot to specify'
+                                           ' a user!', color=embed_color()))
+            return
+        if m.mentions:
+            u = m.mentions[0]
+        else:
+            if len(s) == 3 and s[2].isdigit():
+                u = bot.get_user(int(s[2]))
+                if u is None:
+                    u = closematch(s[2], c.guild.members)
+            else:
+                u = closematch(m.content.replace(f'{s[0]} {s[1]}', '').strip(), c.guild.members)
+        i = str(u.id)
         update_data(i)
         db = json_load('bjson/db.json')
         db[i] += int(p)
         json_dump('bjson/db.json', db)
-        m = f'**{a.mention}**, gave **{p}** points to **{r.mention}**.'
-        await c.send(m)
-        await get_channel(566327770108657698).send(m)
+        e = Embed(description=f'**{a.display_name}**, I gave **{p}** points to **{u.display_name}** successfully.',
+                  color=embed_color())
+        await c.send(embed=e)
+        await bot.get_channel(764839683258712064).send(embed=e)
 
 
 @givepoints.error
 async def givepoints_mra(c, e):
     a = c.author
-    if a.id not in authorized:
+    if a.id not in json_load('bjson/db.json')['a']:
         if isinstance(e, commands.MissingRequiredArgument):
-            await c.send(f'**{a.mention}**, you forgot to specify the points (`e.givepoints <points> <@someone>`)!')
+            await c.send(Embed(description=f'<a:cross:747862910503616683> **| {a.display_name}**, you forgot to specify'
+                                           ' the points!', color=embed_color()))
 
 
 @bot.command(aliases=['rp'])
 async def removepoints(c, p):
     a = c.author
     m = c.message
-    if a.id in authorized:
-        if not m.mentions:
-            await c.send(
-                f'**{a.mention}**, you forgot to mention someone (`e.reducepoints <points> <@someone>`)!')
-            return
+    s = m.content.split()
+    if a.id in json_load('bjson/db.json')['a']:
         if p.isdigit() is False:
-            await c.send(
-                f'**{a.mention}**, you didn\'t choose a valid amount of points! (`e.reducepoints <points> '
-                '<@someone>`)!')
+            await c.send(embed=Embed(
+                description=f'<a:cross:747862910503616683> **| {a.display_name}**, you didn\'t choose a valid amount of'
+                            ' points!', color=embed_color()))
             return
-        r = m.mentions[0]
-        i = str(r.id)
+        if len(s) == 2:
+            await c.send(Embed(description=f'<a:cross:747862910503616683> **| {a.display_name}**, you forgot to specify'
+                                           ' a user!', color=embed_color()))
+            return
+        if m.mentions:
+            u = m.mentions[0]
+        else:
+            if len(s) == 3 and s[2].isdigit():
+                u = bot.get_user(int(s[2]))
+                if u is None:
+                    u = closematch(s[2], c.guild.members)
+            else:
+                u = closematch(m.content.replace(f'{s[0]} {s[1]}', '').strip(), c.guild.members)
+        i = str(u.id)
         update_data(i)
-        d = 'bjson/db.json'
-        db = json_load(d)
+        db = json_load('bjson/db.json')
         db[i] -= int(p)
-        json_dump(d, db)
-        m = f'**{a.mention}**, removed **{p}** points from **{r.mention}**.'
-        await c.send(m)
-        await get_channel(566327770108657698).send(m)
+        json_dump('bjson/db.json', db)
+        e = Embed(description=f'**{a.display_name}**, I removed **{p}** points from **{u.display_name}** successfully.',
+                  color=embed_color())
+        await c.send(embed=e)
+        await bot.get_channel(764839683258712064).send(embed=e)
 
 
 @removepoints.error
 async def removepoints_mra(c, e):
     a = c.author
-    if a.id not in authorized:
+    if a.id not in json_load('bjson/db.json')['a']:
         if isinstance(e, commands.MissingRequiredArgument):
-            await c.send(f'**{a.mention}**, you forgot to specify the points (`e.removepoints <points> <@someone>`)!')
+            await c.send(Embed(description=f'<a:cross:747862910503616683> **| {a.display_name}**, you forgot to specify'
+                                           ' the points!', color=embed_color()))
 
 
 @bot.command(aliases=['p'])
 async def points(c):
     a = c.author
     m = c.message
-    if a.id in authorized:
-        if not m.mentions:
-            await c.send(f'**{a.mention}**, you forgot to mention someone (`e.points <@someone>`)!')
+    if a.id in json_load('bjson/db.json')['a']:
+        if len(c.message.content.split()) == 1:
+            await c.send(Embed(description=f'<a:cross:747862910503616683> **| {a.display_name}**, you forgot to specify'
+                                           ' a user!', color=embed_color()))
             return
-        r = m.mentions[0]
-        i = str(r.id)
+        if m.mentions:
+            u = m.mentions[0]
+        else:
+            s = m.content.split()
+            if len(s) == 3 and s[2].isdigit():
+                u = bot.get_user(int(s[2]))
+                if u is None:
+                    u = closematch(s[2], c.guild.members)
+            else:
+                u = closematch(m.content.replace(f'{s[0]} {s[1]}', '').strip(), c.guild.members)
+        i = str(u.id)
         update_data(i)
         db = json_load('bjson/db.json')
-        await c.send(f'**{a.mention}**, **{r.mention}** has **{db[i]}** points.')
+        await c.send(embed=Embed(description=f'**{a.display_name}**, **{u.display_name}** has **{db[i]}** points.',
+                                 color=embed_color()))
 
 
-@bot.command()
-async def ping(c):
-    before = monotonic()
-    msg = await c.send('*Calculating...*')
-    await msg.edit(content=f'I suffer of `{int((monotonic() - before) * 1000)}ms` of latency, by the way.')
+@bot.group()
+async def pika(c):
+    if c.author.id == bot.owner_id:
+        await c.send('Yes sir, waiting orders sir!')
+
+
+@pika.command()
+async def version(c, v):
+    d = json_load('bjson/db.json')
+    d['v'] = v
+    json_dump('bjson/db.json', d)
+    await c.send(f'Yes sir, changed the version to {v} sir!')
 
 
 async def real_water_hour():
@@ -291,7 +371,7 @@ async def real_water_hour():
                     break
             e = Embed(title=e, description=d, color=embed_color())
             e.set_image(url=u)
-            m = await get_channel(398674318101446678).send('<@&764196084415201321>')
+            m = await bot.get_channel(398674318101446678).send('<@&764196084415201321>')
             await m.edit(embed=e)
             return
         await sleep(60)
@@ -304,7 +384,7 @@ async def on_ready():
 
 @bot.event
 async def on_message(m):
-    if m.author.id in authorized:
+    if m.author.id in json_load('bjson/db.json')['a']:
         d = 'bjson/db.json'
         db = json_load(d)
         t = datetime.now().day
@@ -314,9 +394,9 @@ async def on_message(m):
                     p = floor(db[u] / 15)
                     p = 1 if p == 0 else p
                     db[u] -= p
-                    m = f'Removed {p} points from <@{u}>.'
-                    await get_channel(658737556023672852).send(m)
-                    await get_channel(566327770108657698).send(m)
+                    await bot.get_channel(764839683258712064).send()(embed=Embed(description=f'Removed {p} points from '
+                                                                                             f'<@{u}>.',
+                                                                                 color=embed_color()))
                 db['rp'] = 1
         elif t in [2, 9, 17, 23]:
             if db['rp'] == 1:
@@ -337,8 +417,10 @@ async def on_error(v, *a, **k):
     e.add_field(name="Exception type:", value="{}".format(x), inline=False)
     e.add_field(name="Exception value:", value="{}".format(u), inline=False)
     e.add_field(name="Exception traceback object:", value="{}".format(t), inline=False)
-    await get_channel(566327770108657698).send(embed=e)
-    await get_channel(566327770108657698).send('fix your shit lmao <@552615180450660360>')
+    await bot.get_channel(764839683258712064).send(embed=e)
+    await bot.get_channel(658737556023672852).send(embed=e)
+    await bot.get_channel(764839683258712064).send('<@552615180450660360>, fix me.')
 
 
+update_uptime()
 bot.run(open('token/epb.txt', 'r').readline())
