@@ -182,6 +182,7 @@ async def info(c):
                  icon_url='https://cdn.discordapp.com/avatars/607320011366989826/101bac55cf15807c5c74d7e0d95bb510.png')
     e.add_field(name='Latest Version', value=json_load('bjson/db.json')['v'])
     e.add_field(name='First Version', value='1.0 (2020-09-28)')
+    e.add_field(name='Source Code', value='https://github.com/Pikalex04/Ermii-Pikabot.py', inline=False)
     e.add_field(name='Developers', value='Pikalex04 and Ermelber')
     e.add_field(name='Discord API Libraries', value='discord.py')
     e.add_field(name='Languages', value='Python, JSON and Markdown')
