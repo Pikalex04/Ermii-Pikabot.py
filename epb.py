@@ -204,7 +204,7 @@ async def uptime(c):
     for member in c.guild.members:
         if member.status != Status.offline:
             m += 1
-    await c.send(embed=Embed(description=f'Current time: **{datetime.now().isoformat(" ")}\n'
+    await c.send(embed=Embed(description=f'Current time: **{datetime.now().isoformat(" ")}**\n'
                                          f'Bot last started at: **{json_load("bjson/db.json")["u"]}**\n'
                                          f'Online members: **{m}**', color=embed_color()))
 
@@ -373,6 +373,8 @@ async def real_water_hour():
             e.set_image(url=u)
             m = await bot.get_channel(398674318101446678).send('<@&764196084415201321>')
             await m.edit(embed=e)
+            await sleep(60)
+            bot.bg_task = await bot.loop.create_task(real_water_hour())
             return
         await sleep(60)
 
