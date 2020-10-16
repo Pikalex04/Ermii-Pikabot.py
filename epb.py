@@ -397,9 +397,9 @@ async def on_message(m):
                     p = floor(db[u] / 15)
                     p = 1 if p == 0 else p
                     db[u] -= p
-                    await bot.get_channel(764839683258712064).send()(embed=Embed(description=f'Removed {p} points from '
-                                                                                             f'<@{u}>.',
-                                                                                 color=embed_color()))
+                    await bot.get_channel(764839683258712064).send(embed=Embed(description=f'Removed {p} points from '
+                                                                                           f'<@{u}>.',
+                                                                               color=embed_color()))
                 db['rp'] = 1
         elif t in [2, 9, 17, 23]:
             if db['rp'] == 1:
