@@ -235,6 +235,7 @@ async def givepoints(c, p):
     a = c.author
     m = c.message
     s = m.content.split()
+    db = json_load('bjson/db.json')
     if a.id in json_load('bjson/db.json')['a']:
         if p.isdigit() is False:
             await c.send(embed=Embed(
@@ -256,8 +257,7 @@ async def givepoints(c, p):
                 u = closematch(m.content.replace(f'{s[0]} {s[1]}', '').strip(), c.guild.members)
         i = str(u.id)
         update_data(i)
-        db = json_load('bjson/db.json')
-        db[i] += int(p)
+        db['sp'][i] += int(p)
         json_dump('bjson/db.json', db)
         e = Embed(description=f'**{a.display_name}**, I gave **{p}** points to **{u.display_name}** successfully.',
                   color=embed_color())
@@ -279,7 +279,8 @@ async def removepoints(c, p):
     a = c.author
     m = c.message
     s = m.content.split()
-    if a.id in json_load('bjson/db.json')['a']:
+    db = json_load('bjson/db.json')
+    if a.id in db['a']:
         if p.isdigit() is False:
             await c.send(embed=Embed(
                 description=f'<a:cross:747862910503616683> **| {a.display_name}**, you didn\'t choose a valid amount of'
@@ -300,8 +301,7 @@ async def removepoints(c, p):
                 u = closematch(m.content.replace(f'{s[0]} {s[1]}', '').strip(), c.guild.members)
         i = str(u.id)
         update_data(i)
-        db = json_load('bjson/db.json')
-        db[i] -= int(p)
+        db['sp'][i] -= int(p)
         json_dump('bjson/db.json', db)
         e = Embed(description=f'**{a.display_name}**, I removed **{p}** points from **{u.display_name}** successfully.',
                   color=embed_color())
@@ -322,7 +322,8 @@ async def removepoints_mra(c, e):
 async def points(c):
     a = c.author
     m = c.message
-    if a.id in json_load('bjson/db.json')['a']:
+    db = json_load('bjson/db.json')
+    if a.id in db['a']:
         if len(c.message.content.split()) == 1:
             await c.send(Embed(description=f'<a:cross:747862910503616683> **| {a.display_name}**, you forgot to specify'
                                            ' a user!', color=embed_color()))
@@ -339,9 +340,8 @@ async def points(c):
                 u = closematch(m.content.replace(f'{s[0]} {s[1]}', '').strip(), c.guild.members)
         i = str(u.id)
         update_data(i)
-        db = json_load('bjson/db.json')
-        await c.send(embed=Embed(description=f'**{a.display_name}**, **{u.display_name}** has **{db[i]}** points.',
-                                 color=embed_color()))
+        await c.send(embed=Embed(description=f'**{a.display_name}**, **{u.display_name}** has **{db["sp"][i]}** '
+                                             'points.', color=embed_color()))
 
 
 @bot.group()
@@ -393,8 +393,8 @@ async def on_message(m):
         t = datetime.now().day
         if t in [1, 8, 16, 22]:
             if db['rp'] == 0:
-                for u in db:
-                    p = floor(db[u] / 15)
+                for u in db['sp']:
+                    p = floor(db['sp'][u] / 15)
                     p = 1 if p == 0 else p
                     db[u] -= p
                     await bot.get_channel(764839683258712064).send(embed=Embed(description=f'Removed {p} points from '
