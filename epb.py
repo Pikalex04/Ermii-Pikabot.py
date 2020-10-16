@@ -396,7 +396,7 @@ async def on_message(m):
                 for u in db['sp']:
                     p = floor(db['sp'][u] / 15)
                     p = 1 if p == 0 else p
-                    db[u] -= p
+                    db['sp'][u] -= p
                     await bot.get_channel(764839683258712064).send(embed=Embed(description=f'Removed {p} points from '
                                                                                            f'<@{u}>.',
                                                                                color=embed_color()))
