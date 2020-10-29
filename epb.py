@@ -50,8 +50,8 @@ def embed_color():
 def update_data(a):
     d = 'bjson/db.json'
     db = json_load(d)
-    if a not in db:
-        db[a] = 0
+    if a not in db['sp']:
+        db['sp'][a] = 0
         json_dump(d, db)
 
 
@@ -335,7 +335,7 @@ async def points(c):
             if len(s) == 3 and s[2].isdigit():
                 u = bot.get_user(int(s[2]))
                 if u is None:
-                    u = closematch(s[2], c.guild.members)
+                    u = closematch(c.message.content.replace(c.message.content.split[0], ''), c.guild.members)
             else:
                 u = closematch(m.content.replace(f'{s[0]} {s[1]}', '').strip(), c.guild.members)
         i = str(u.id)
@@ -360,7 +360,7 @@ async def version(c, v):
 
 async def real_water_hour():
     while not bot.is_closed():
-        if datetime.now().minute == 29 and datetime.now(tz=timezone.utc).hour == 21:
+        if datetime.now().minute == 29 and datetime.now(tz=timezone.utc).hour == 22:
             w = json_load('water/water.json')
             t = datetime.now().weekday()
             e = d = u = ''
