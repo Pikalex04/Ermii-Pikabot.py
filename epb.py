@@ -1,5 +1,5 @@
 from json import load, dump
-from discord import Embed, Status
+from discord import Embed, Status, Intents
 from discord.ext import commands
 from discord.utils import get
 from time import monotonic
@@ -10,7 +10,8 @@ from random import choice
 from asyncio import sleep
 from difflib import get_close_matches
 
-bot = commands.Bot(command_prefix='e.', owner_id=552615180450660360, case_insensitive=True)
+bot = commands.Bot(command_prefix='e.', owner_id=552615180450660360, case_insensitive=True,
+                   intents=Intents.default().all())
 bot.remove_command('help')
 
 
