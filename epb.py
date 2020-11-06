@@ -9,6 +9,7 @@ from sys import exc_info
 from random import choice
 from asyncio import sleep
 from difflib import get_close_matches
+import socket
 
 bot = commands.Bot(command_prefix='e.', owner_id=552615180450660360, case_insensitive=True,
                    intents=Intents.default().all())
@@ -192,6 +193,18 @@ async def info(c):
     await c.send(embed=e)
 
 
+@bot.command(aliases=['mc'])
+async def mcsize(c):
+    if c.author.id == bot.owner_id:
+        host = "garhoogin.com"
+        port = 25566
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect((host, port))
+        print(s)
+    else:
+        return
+
+
 @bot.command()
 async def ping(c):
     b = monotonic()
@@ -257,7 +270,9 @@ async def givepoints(c, p):
             else:
                 u = closematch(m.content.replace(f'{s[0]} {s[1]}', '').strip(), c.guild.members)
         i = str(u.id)
-        update_data(i)
+        if i not in db:
+            update_data(i)
+            db = json_load('bjson/db.json')
         db['sp'][i] += int(p)
         json_dump('bjson/db.json', db)
         e = Embed(description=f'**{a.display_name}**, I gave **{p}** points to **{u.display_name}** successfully.',
@@ -273,6 +288,9 @@ async def givepoints_mra(c, e):
         if isinstance(e, commands.MissingRequiredArgument):
             await c.send(Embed(description=f'<a:cross:747862910503616683> **| {a.display_name}**, you forgot to specify'
                                            ' the points!', color=embed_color()))
+        elif isinstance(e, Exception):
+            await c.send(Embed(description=f'<a:cross:747862910503616683> **| {a.display_name}**, I didn\'t find '
+                                           'anyone with that name or nickname!', color=embed_color()))
 
 
 @bot.command(aliases=['rp'])
@@ -301,7 +319,9 @@ async def removepoints(c, p):
             else:
                 u = closematch(m.content.replace(f'{s[0]} {s[1]}', '').strip(), c.guild.members)
         i = str(u.id)
-        update_data(i)
+        if i not in db:
+            update_data(i)
+            db = json_load('bjson/db.json')
         db['sp'][i] -= int(p)
         json_dump('bjson/db.json', db)
         e = Embed(description=f'**{a.display_name}**, I removed **{p}** points from **{u.display_name}** successfully.',
@@ -317,6 +337,9 @@ async def removepoints_mra(c, e):
         if isinstance(e, commands.MissingRequiredArgument):
             await c.send(Embed(description=f'<a:cross:747862910503616683> **| {a.display_name}**, you forgot to specify'
                                            ' the points!', color=embed_color()))
+        elif isinstance(e, Exception):
+            await c.send(Embed(description=f'<a:cross:747862910503616683> **| {a.display_name}**, I didn\'t find '
+                                           'anyone with that name or nickname!', color=embed_color()))
 
 
 @bot.command(aliases=['p'])
@@ -338,11 +361,19 @@ async def points(c):
                 if u is None:
                     u = closematch(c.message.content.replace(c.message.content.split[0], ''), c.guild.members)
             else:
-                u = closematch(m.content.replace(f'{s[0]} {s[1]}', '').strip(), c.guild.members)
+                u = closematch(m.content.replace(f'{s[0]}', '').strip(), c.guild.members)
         i = str(u.id)
-        update_data(i)
+        if i not in db:
+            update_data(i)
+            db = json_load('bjson/db.json')
         await c.send(embed=Embed(description=f'**{a.display_name}**, **{u.display_name}** has **{db["sp"][i]}** '
                                              'points.', color=embed_color()))
+
+
+@points.error
+async def points_error(c):
+    await c.send(Embed(description=f'<a:cross:747862910503616683> **| {c.author.display_name}**, I didn\'t find '
+                                   'anyone with that name or nickname!', color=embed_color()))
 
 
 @bot.group()
